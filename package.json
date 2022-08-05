@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
+  },
+  "devDependencies": {
+    "nuxt": "3.0.0-rc.6"
+  },
+  "dependencies": {
+    "mapbox-gl": "^1.13.2",
+    "v-mapbox": "^3.3.1"
+  }
+}
