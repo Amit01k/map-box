@@ -36,7 +36,7 @@ var geojson = {
   features: [
     {
       type: "Feature",
-      properties: { title: "Mapbox", description: "Washington, D.C." },
+      properties: { title: "amit home ", description: "back to home " },
       geometry: {
         type: "Point",
         coordinates: [444.04931277036667, 26.266912177018096],
@@ -44,7 +44,7 @@ var geojson = {
     },
     {
       type: "Feature",
-      properties: {},
+      properties: { title: "villege", description: "uttar pradesh" },
       geometry: {
         type: "Point",
         coordinates: [444.0481862425804, 26.266565820518633],
@@ -52,7 +52,7 @@ var geojson = {
     },
     {
       type: "Feature",
-      properties: {},
+      properties: { title: "market", description: "uttar pradesh." },
       geometry: {
         type: "Point",
         coordinates: [444.0496963262558, 26.266450368122516],
@@ -60,7 +60,7 @@ var geojson = {
     },
     {
       type: "Feature",
-      properties: {},
+      properties: { title: "home", description: "asdfghjhjkl." },
       geometry: {
         type: "Point",
         coordinates: [444.04630064964294, 26.23214630354235],
@@ -69,7 +69,7 @@ var geojson = {
   ],
 };
 
-function onMapLoaded(map) {
+function onMapLoaded(map: mapboxgl.Map) {
   console.log("amit kumar");
   //new mapboxgl.Marker().setLngLat([444.0463, 26.2321]).addTo(map);
   for (const feature of geojson.features) {
@@ -80,12 +80,40 @@ function onMapLoaded(map) {
     // make a marker for each feature and add to the map
     new mapboxgl.Marker(el)
       .setLngLat(feature.geometry.coordinates)
+      .setPopup(
+        new mapboxgl.Popup({ offset: 25 }) // add popups
+          .setHTML(
+            `<h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`
+          )
+      )
 
       .addTo(map);
 
-    map.on("click", (e) => {
+    // map.on("mouseover", (e) => {
+    //   console.log("hiii MIT").setPopup(
+    //     new mapboxgl.Popup({ offset: 25 }) // add popups
+    //       .setHTML(
+    //         `<h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`
+    //       )
+    //   );
+    // });
+
+    map.on("dblclick", (e) => {
+      new mapboxgl.Marker({
+        color: "#" + (Math.random().toString(16) + "87CEEB").substring(2, 8),
+        draggable: true,
+      })
+        .setLngLat([e.lngLat.lng, e.lngLat.lat])
+        .addTo(map);
       console.log(`A click event has occurred at ${e.lngLat}`);
     });
+
+    // const marker = new mapboxgl.Marker({
+    //   color: "#FFFFFF",
+    //   draggable: true,
+    // })
+    //   .setLngLat([30.5, 50.5])
+    //   .addTo(map);
   }
 }
 </script>
