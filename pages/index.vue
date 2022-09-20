@@ -35,7 +35,7 @@
 // import "v-mapbox/dist/v-mapbox.css";
 
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
-
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import VMap from "v-mapbox";
 import mapboxgl from "mapbox-gl";
 
@@ -57,18 +57,6 @@ const state = reactive({
   },
   data: [],
 });
-
-// mapboxgl.accessToken =
-//   "pk.eyJ1Ijoic29jaWFsZXhwbG9yZXIiLCJhIjoiREFQbXBISSJ9.dwFTwfSaWsHvktHrRtpydQ";
-// var map = new mapboxgl.Map({
-//   container: "map",
-//   style: "mapbox://styles/mapbox/streets-v11?optimize=true",
-//   center: [444.04931277036667, 26.266912177018096] as number[],
-//   zoom: 11,
-//   //     maxZoom: 22,
-// });
-
-var value = state.data;
 
 var geojson = {
   type: "FeatureCollection",
@@ -135,16 +123,9 @@ for (let data in state.data) {
 //       .addTo(map);
 //   }
 //console.log(getGisData());
+
 function onMapLoaded(map: mapboxgl.Map) {
-  console.log("amit kumar");
-  // getGisData();
-
-  console.log("line nu 129 after getdata  function", state.data);
-
-  //new mapboxgl.Marker().setLngLat([444.0463, 26.2321]).addTo(map);
-
   getGisData();
-
   async function getGisData() {
     state.data = await $fetch("http://localhost:8080/gisdata/data");
     console.log("data: ", state.data);
@@ -158,71 +139,56 @@ function onMapLoaded(map: mapboxgl.Map) {
       // make a marker for each feature and add to the map
       new mapboxgl.Marker(el)
         .setLngLat(feature.location.coordinates)
+        .setPopup(
+          new mapboxgl.Popup({ offset: 20 }) // add popups
+            .setHTML(`<h3>${feature.City_Name}</h3><p>${feature.City_Name}</p>`)
+        )
         .addTo(map);
       console.log("line 138");
-
-      // .setPopup(
-      //   new mapboxgl.Popup({ offset: 25 }) // add popups
-      //     .setHTML(
-      //       `<h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`
-      //     )
-      // )
     }
   }
-
-  // map.on("mouseover", (e) => {
-  //   console.log("hiii MIT").setPopup(
-  //     new mapboxgl.Popup({ offset: 25 }) // add popups
-  //       .setHTML(
-  //         `<h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`
-  //       )
-  //   );
-  // });
+  //show markers according coordinates
 
   //add markers
 
-  // map.on("dblclick", (e) => {
-  //   new mapboxgl.Marker({
-  //     color: "#" + (Math.random().toString(16) + "87CEEB").substring(2, 8),
-  //     draggable: true,
-  //   })
-  //     .setLngLat([e.lngLat.lng, e.lngLat.lat])
-  //     .addTo(map);
-  //   console.log(`A click event has occurred at ${e.lngLat}`);
-  // });
+  map.on("dblclick", (e) => {
+    new mapboxgl.Marker({
+      color: "#" + (Math.random().toString(16) + "87CEEB").substring(2, 8),
+      draggable: true,
+    })
+      .setLngLat([e.lngLat.lng, e.lngLat.lat])
+      .addTo(map);
+    console.log(`A click event has occurred at ${e.lngLat}`);
+  });
 
-  // const layerList = document.getElementById("menu");
-  // const inputs = layerList.getElementsByTagName("input");
+  const layerList = document.getElementById("menu");
+  const inputs = layerList.getElementsByTagName("input");
 
   //dropdown function here
 
-  // for (const input of inputs) {
-  //   input.onclick = (layer) => {
-  //     const layerId = layer.target.id;
-  //     map.setStyle("mapbox://styles/mapbox/" + layerId);
-  //   };
+  for (const input of inputs) {
+    input.onclick = (layer) => {
+      const layerId = layer.target.id;
+      map.setStyle("mapbox://styles/mapbox/" + layerId);
+    };
+  }
+
+  const marker = new mapboxgl.Marker({
+    color: "#FFFFFF",
+    //draggable: true,
+  })
+    .setLngLat([30.5, 50.5])
+    .addTo(map);
+
+  map.addControl(
+    new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl,
+    })
+  );
   // }
 
-  // map.addControl(
-  //   new MapboxGeocoder({
-  //     accessToken: mapboxgl.accessToken,
-  //     mapboxgl: mapboxgl,
-  //   })
-  // );
-
-  // const marker = new mapboxgl.Marker({
-  //   color: "#FFFFFF",
-  //   draggable: true,
-  // })
-  //   .setLngLat([30.5, 50.5])
-  //   .addTo(map);
-  //}
-  // map.addControl(
-  //   new MapboxGeocoder({
-  //     accessToken: mapboxgl.accessToken,
-  //     mapboxgl: mapboxgl,
-  //   })
-  // );
+  ////////////////////////////////try to add layers on map box///////////////////
 }
 </script>
 <style>
@@ -244,8 +210,8 @@ function onMapLoaded(map: mapboxgl.Map) {
 .marker {
   background-image: url("http://localhost:3000/assets/images/download.png");
   background-size: cover;
-  width: 50px;
-  height: 50px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   cursor: pointer;
 }
