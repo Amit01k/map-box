@@ -33,6 +33,8 @@
 <script setup lang="ts">
 // import "mapbox-gl/dist/mapbox-gl.css";
 // import "v-mapbox/dist/v-mapbox.css";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
@@ -56,6 +58,7 @@ const state = reactive({
     maxZoom: 22,
   },
   data: [],
+  polygon: [],
 });
 
 var geojson = {
@@ -96,9 +99,9 @@ var geojson = {
   ],
 };
 
-for (let data in state.data) {
-  console.log(data);
-}
+// for (let data in state.data) {
+//   console.log(data);
+// }
 
 // console.log();
 
@@ -149,6 +152,10 @@ function onMapLoaded(map: mapboxgl.Map) {
   }
   //show markers according coordinates
 
+  //draw tool
+  var Draw = new MapboxDraw();
+  map.addControl(Draw, "top-left");
+
   //add markers
 
   map.on("dblclick", (e) => {
@@ -187,8 +194,71 @@ function onMapLoaded(map: mapboxgl.Map) {
     })
   );
   // }
-
+  console.log("line no-190");
   ////////////////////////////////try to add layers on map box///////////////////
+  map.addSource("Nagpur", {
+    type: "geojson",
+    data: {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        //<----boundary co-ordinate----->
+        coordinates: [
+          [
+            [431.2188720703125, 23.75518176611264],
+            [430.762939453125, 23.17066382710224],
+            [431.729736328125, 23.160563309048314],
+            [431.2188720703125, 23.75518176611264],
+          ],
+        ],
+      },
+    },
+  });
+  map.addLayer({
+    id: "Nagpur",
+    type: "fill",
+    source: "Nagpur",
+    layout: {},
+    paint: {
+      "fill-color": "#f02",
+      //rediish
+      "fill-opacity": 0.5,
+    },
+  });
+  map.addLayer({
+    id: "outline",
+    type: "line",
+    source: "Nagpur",
+    layout: {},
+    paint: {
+      "line-color": "#000",
+      //dark blackish
+      "line-width": 3,
+    },
+  });
+  polygon();
+  async function polygon() {
+    state.polygon = await $fetch("http://localhost:8080/gisdata/polygon");
+    console.log(state.polygon);
+    console.log("data: ", state.polygon);
+    for (const poly of state.polygon) {
+      // create a HTML element for each feature
+      const el = document.createElement("div");
+      el.className = "marker";
+
+      console.log("data from polygon line  243   " + poly.polygon.coordinates);
+
+      //make a marker for each feature and add to the map
+      new mapboxgl.Marker(el)
+        .setLngLat(poly.polygon.coordinates)
+        .setPopup(
+          new mapboxgl.Popup({ offset: 20 }) // add popups
+            .setHTML(`<h3>${poly.City_Name}</h3><p>${poly.City_Name}</p>`)
+        )
+        .addTo(map);
+      console.log("line 138");
+    }
+  }
 }
 </script>
 <style>
