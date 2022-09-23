@@ -1,4 +1,11 @@
 <template>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
+      type="text/css"
+    />
+  </head>
   <div>
     <main class="w-screen h-screen">
       <v-map class="w-full h-full" :options="state.map" @loaded="onMapLoaded" />
@@ -35,6 +42,7 @@
 // import "v-mapbox/dist/v-mapbox.css";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+import MapboxDirection from "@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions";
 
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
@@ -150,6 +158,13 @@ function onMapLoaded(map: mapboxgl.Map) {
       console.log("line 138");
     }
   }
+
+  map.addControl(
+    new MapboxDirection({
+      accessToken: mapboxgl.accessToken,
+    }),
+    "top-left"
+  );
   //show markers according coordinates
 
   //draw tool
@@ -194,6 +209,20 @@ function onMapLoaded(map: mapboxgl.Map) {
     })
   );
   // }
+  map.addControl(new mapboxgl.NavigationControl(), "top-left");
+
+  //Add a fullscreen control to a map
+  map.addControl(new mapboxgl.FullscreenControl(), "bottom-left");
+
+  // map.addControl(
+  //   new MapboxDirection({
+  //     accessToken: mapboxgl.accessToken,
+  //   }),
+  //   "top-left"
+  // );
+
+  //map.addControl(new mapboxgl.NavigationControl());
+
   console.log("line no-190");
   ////////////////////////////////try to add layers on map box///////////////////
   map.addSource("Nagpur", {
@@ -241,23 +270,59 @@ function onMapLoaded(map: mapboxgl.Map) {
     state.polygon = await $fetch("http://localhost:8080/gisdata/polygon");
     console.log(state.polygon);
     console.log("data: ", state.polygon);
-    for (const poly of state.polygon) {
-      // create a HTML element for each feature
-      const el = document.createElement("div");
-      el.className = "marker";
 
-      console.log("data from polygon line  243   " + poly.polygon.coordinates);
+    const featureCollection = {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: [],
+      },
+    };
 
-      //make a marker for each feature and add to the map
-      new mapboxgl.Marker(el)
-        .setLngLat(poly.polygon.coordinates)
-        .setPopup(
-          new mapboxgl.Popup({ offset: 20 }) // add popups
-            .setHTML(`<h3>${poly.City_Name}</h3><p>${poly.City_Name}</p>`)
-        )
-        .addTo(map);
-      console.log("line 138");
-    }
+    featureCollection.data.features = state.polygon.map((element) => {
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: element.polygon.coordinates,
+        },
+      };
+    });
+
+    map.addSource("polygon-data", featureCollection);
+
+    map.addLayer({
+      id: "park-boundary",
+      type: "fill",
+      source: "polygon-data",
+      paint: {
+        "fill-color": "#A020F0",
+        "fill-opacity": 0.4,
+      },
+    });
+
+    map.addLayer({
+      id: "outline",
+      type: "line",
+      source: "park-boundary",
+      layout: {},
+      paint: {
+        "line-color": "#000",
+        //dark blackish
+        "line-width": 3,
+      },
+    });
+
+    //make a marker for each feature and add to the map
+    // new mapboxgl.Marker(el)
+    //   .setLngLat(poly.polygon.coordinates)
+    //   .setPopup(
+    //     new mapboxgl.Popup({ offset: 20 }) // add popups
+    //       .setHTML(`<h3>${poly.City_Name}</h3><p>${poly.City_Name}</p>`)
+    //   )
+    //   .addTo(map);
+    console.log("line 138");
+    // }
   }
 }
 </script>
