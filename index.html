@@ -38,12 +38,57 @@
             text-align: center;
             font-family: 'Open Sans', sans-serif;
         }
+        #buttons {
+width: 90%;
+margin: 0 auto;
+}
+.button {
+display: inline-block;
+position: relative;
+cursor: pointer;
+width: 20%;
+padding: 8px;
+border-radius: 3px;
+margin-top: 10px;
+font-size: 12px;
+text-align: center;
+color: #fff;
+background: #ee8a65;
+font-family: sans-serif;
+font-weight: bold;
+}
+#btn-spin {
+font: bold 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+background-color: #3386c0;
+color: #fff;
+position: absolute;
+top: 20px;
+left: 50%;
+z-index: 1;
+border: none;
+width: 200px;
+margin-left: -100px;
+display: block;
+cursor: pointer;
+padding: 10px 20px;
+border-radius: 3px;
+}
+#btn-spin:hover {
+background-color: #4ea0da;
+}
     </style>
 </head>
 
 <body>
     <div id="map"></div>
-
+    <ul id="buttons">
+        <li id="button-fr" class="button">French</li>
+        <li id="button-ru" class="button">Russian</li>
+        <li id="button-de" class="button">German</li>
+        <li id="button-es" class="button">Spanish</li>
+        </ul>
+       
+        <button id="btn-spin">Pause rotation</button>
     <script
         src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
     <link rel="stylesheet"
@@ -92,11 +137,23 @@
             ],
         };
 
+        document.getElementById('buttons').addEventListener('click', (event) => {
+const language = event.target.id.substr('button-'.length);
+// Use setLayoutProperty to set the value of a layout property in a style layer.
+// The three arguments are the id of the layer, the name of the layout property,
+// and the new property value.
+map.setLayoutProperty('country-label', 'text-field', [
+'get',
+`name_${language}`
+]);
+});
+
         const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/light-v10',
             center: [444.04931277036667, 26.266912177018096],
-            zoom: 3
+            zoom: 3,
+            cooperativeGestures: true,
         });
 
         // add markers to map
@@ -228,50 +285,6 @@ map.addLayer({
 });
 });
 
-
-
-        // map.on('load', () => {
-        //     const layers = map.getStyle().layers;
-        //     // Find the index of the first symbol layer in the map style.
-        //     let firstSymbolId;
-        //     for (const layer of layers) {
-        //         if (layer.type === 'symbol') {
-        //             firstSymbolId = layer.id;
-        //             break;
-        //         }
-        //     }
-
-        //     map.addSource('urban-areas', {
-        //         'type': 'geojson',
-        //         'data': 'https://docs.mapbox.com/mapbox-gl-js/assets/ne_50m_urban_areas.geojson'
-        //     });
-        //     map.addLayer(
-        //         {
-        //             'id': 'urban-areas-fill',
-        //             'type': 'fill',
-        //             'source': 'urban-areas',
-        //             'layout': {},
-        //             'paint': {
-        //                 'fill-color': '#f08',
-        //                 'fill-opacity': 0.4
-        //             }
-        //             // This is the important part of this example: the addLayer
-        //             // method takes 2 arguments: the layer as an object, and a string
-        //             // representing another layer's name. If the other layer
-        //             // exists in the style already, the new layer will be positioned
-        //             // right before that layer in the stack, making it possible to put
-        //             // 'overlays' anywhere in the layer stack.
-        //             // Insert the layer beneath the first symbol layer.
-        //         },
-        //         firstSymbolId
-        //     );
-
-
-
-            
-        // });
-
-        
 
 
 
