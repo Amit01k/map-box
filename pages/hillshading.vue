@@ -8,7 +8,6 @@
         />
       </head>
       <v-map class="w-full h-full" :options="state.map" @loaded="onMapLoaded" />
-      <button id="fly">Fly</button>
 
       <div id="menu" class="">
         <input
@@ -40,82 +39,35 @@ import { once } from "events";
 //import globe from "globe"
 mapboxgl.accessToken =
   "pk.eyJ1Ijoic29jaWFsZXhwbG9yZXIiLCJhIjoiREFQbXBISSJ9.dwFTwfSaWsHvktHrRtpydQ";
-const start = {
-  center: [80, 36],
-  zoom: 1,
-  pitch: 0,
-  bearing: 0,
-};
-const end = {
-  // center: [74.5, 40],
-  // zoom: 2
-  center: [8.11862, 46.58842],
-  zoom: 12.5,
-  bearing: 130,
-  pitch: 75,
-};
+
 //const data: string;
 const state = reactive({
   map: {
     container: "map",
-    zoom: 13.1,
-    center: [-114.34411, 32.6141],
+    zoom: 9,
+    center: [-119.5591, 37.715],
     //pitch: 45,
-    pitch: 85,
-    bearing: 80,
+    // pitch: 85,
+    // bearing: 80,
     // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
-    style: "mapbox://styles/mapbox/satellite-streets-v11",
-    projection: "globe",
-    ...start,
+    style: "mapbox://styles/mapbox/cjaudgl840gn32rnrepcb9b9g",
   },
 });
 function onMapLoaded(map: mapboxgl.Map) {
-  map.setFog({
-    color: "rgb(220, 159, 159)", // Pink fog / lower atmosphere
-    "high-color": "rgb(36, 92, 223)", // Blue sky / upper atmosphere
-    "horizon-blend": 0.4, // Exaggerate atmosphere (default is .1)
-  });
-
-  map.addSource("mapbox-dem", {
+  map.addSource("dem", {
     type: "raster-dem",
-    url: "mapbox://mapbox.terrain-rgb",
+    url: "mapbox://mapbox.mapbox-terrain-dem-v1",
   });
-
-  map.setTerrain({
-    source: "mapbox-dem",
-    exaggeration: 1.5,
-  });
-  let isAtStart = true;
-
-  document.getElementById("fly").addEventListener("click", () => {
-    // depending on whether we're currently at point a or b,
-    // aim for point a or b
-    const target = isAtStart ? end : start;
-    isAtStart = !isAtStart;
-
-    map.flyTo({
-      ...target, // Fly to the selected target
-      duration: 12000, // Animate over 12 seconds
-      essential: true, // This animation is considered essential with
-      //respect to prefers-reduced-motion
-    });
-  });
-
-  //jump location
-  const cityCoordinates = [
-    [100.507, 13.745],
-    [438.02490234375, 15.072123545811683],
-    [99.838, 19.924],
-    [102.812, 17.408],
-    [100.458, 7.001],
-    [100.905, 12.935],
-  ];
-
-  for (const [index, coordinate] of cityCoordinates.entries()) {
-    setTimeout(() => {
-      map.jumpTo({ center: coordinate });
-    }, 2000 * index);
-  }
+  map.addLayer(
+    {
+      id: "hillshading",
+      source: "dem",
+      type: "hillshade",
+      // insert below waterway-river-canal-shadow;
+      // where hillshading sits in the Mapbox Outdoors style
+    },
+    "waterway-river-canal-shadow"
+  );
 }
 </script>
 <style>
